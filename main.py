@@ -243,9 +243,21 @@ def add_note_text_to_observations():
     i = 0
     for observation in observations:
         note_text = observation['notes']
-
+        wait_time = random.randint(2, 4)
         if note_text[:27] == 'http://www.sufoi.dk/obs/obs':
-            wait_time = random.randint(3, 10)
+            # Pause the execution for the randomly generated time
+            time.sleep(wait_time)
+            try:
+                note_text = get_note_text(note_text)
+                #print(note_text)
+                observations[i]['notes'] = note_text
+            except:
+                observations[i]['notes'] = ''
+                #print('ERROR!!!' + note_text)
+            save_array_to_json(observations, 'observations-with-note-text.json')
+
+        if note_text[:25] == 'http://www.ufo.dk/obs/obs':
+            print('Ufo')
 
             # Pause the execution for the randomly generated time
             time.sleep(wait_time)
@@ -260,15 +272,12 @@ def add_note_text_to_observations():
 
         if note_text[:13] == '../../obs/obs':
             try:
-
-                wait_time = random.randint(3, 10)
-
                 # Pause the execution for the randomly generated time
                 time.sleep(wait_time)
                 new_link = 'http://www.sufoi.dk/' + note_text[6:]
                 note_text = get_note_text(new_link)
                 observations[i]['notes'] = note_text
-                print(new_link, note_text)
+                #print(new_link, note_text)
                 save_array_to_json(observations, 'observations-with-note-text.json')
             except:
                 print('ERROR!!!' + note_text)
