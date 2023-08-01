@@ -284,45 +284,32 @@ def add_note_text_to_observations():
         i += 1
 
 
-add_note_text_to_observations()
-
-def clean_weird_links():
-    filename = 'observations-with-note-text.json'
-    observations = read_json_file(filename)
-    index = 0
-    for observation in observations:
-        note_text = observation['notes']
-        if '.php#' in note_text:
-            print(observation)
-
-        index += 1
-
-#clean_weird_links()
+# add_note_text_to_observations()
 
 
 def clean_data_using_gpt():
-    prompt = """Jeg er ved at rense data og skal bruge det rensede data. Kun svar med det rensede data!
-Kolonnerne er som følger
-Dato; Begyndel-sestidspunkt; Varighed i sekunder; Observationssted (postnr. og by); Vidner; Farver; Bemærkninger
+    prompt = """Rens det følgende datasæt. Kun svar med det rensede data!
+
+Dato (DD.MM.YYYY fx 23.04.2017); Begyndelsestidspunkt (skal indeholde formatet 15:30); Varighed i sekunder (skal indeholde varighed i sekunder); Observationssted; Vidner (skal være et heltal); Farver (skal være komma sepereret farver fx grøn, gul, hvid)
 
 Original data:
-august 1999; ca. 23.00 DST; 2-3 sek; Nordsjælland; ?; hvidt
+august 1999;ca. 00.00 og ca. 01.30;flere min;Nordsjælland;?;hvidt
 Renset data:
-01.08.1999; 23:00; 3; Nordsjælland; NAN; hvid
+01.08.1999;00:00;180;Nordsjælland;NAN;hvid
 
 Original data:
-04.08.00; ca. 03.30-04.00 DST; 2-3 sek; 5500 Middelfart; 2; guld, gløder som fuldmånen
+04.08.00;ca. 03.30-04.00 DST;2-3 sek;5500 Middelfart;2-3;guld, gløder som fuldmånen
 Renset data:
-04.08.2000; 03:30; 3; 5500 Middelfart; 2; guld
+04.08.2000;03:30;3;5500 Middelfart;3;guld
 
 Original data:
-22.07.13; eftermiddag; +20 sek; 6400 Sønderborg; ?; sort/grå/blå
+sommeren ca. 1979;eftermiddag;+20 sek;6400 Sønderborg;6-10;sort/grå/blå
 Renset data:
-22.07.2013; 15:00; 20; 6400 Sønderborg; sort, grå, blå; 
+06.01.1979;15:00;20;6400 Sønderborg;10; sort, grå, blå; 
 
 Original data:"""
 
-    filename = 'observations-with-note-text.json'  # Replace with the actual filename
+    filename = 'observations-with-note-text-cleaned.json'  # Replace with the actual filename
     observations = read_json_file(filename)
 
     index = 0
@@ -335,19 +322,33 @@ Original data:"""
             ])
 
             full_prompt = prompt + '\n' + original_observation + "\nRenset data:"
-            print(original_observation)
-            cleaned_data = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": full_prompt}])['choices'][0]['message']['content']
-            print(cleaned_data)
-            cleaned_data_split = cleaned_data.split(';')
-            observations[index]['date'] = cleaned_data_split[0]
-            observations[index]['start-time'] = cleaned_data_split[1]
-            observations[index]['duration'] = cleaned_data_split[2]
-            observations[index]['location'] = cleaned_data_split[3]
-            observations[index]['witnesses'] = cleaned_data_split[4]
-            observations[index]['colors'] = cleaned_data_split[5]
-            observations[index]['cleaned'] = 'true'
-            save_array_to_json(observations, 'observations-with-note-text-cleaned.json')
+            try:
+                cleaned_data = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[{"role": "user", "content": full_prompt}])['choices'][0]['message']['content']
+
+                cleaned_data_split = cleaned_data.split(';')
+
+                print(observation['date'], " -> ", cleaned_data_split[0].strip())
+                print(observation['start-time'], " -> ", cleaned_data_split[1].strip())
+                print(observation['duration'], " -> ", cleaned_data_split[2].strip())
+                print(observation['location'], " -> ", cleaned_data_split[3].strip())
+                print(observation['witnesses'], " -> ", cleaned_data_split[4].strip())
+                print(observation['colors'], " -> ", cleaned_data_split[5].strip())
+                print('\n')
+
+                observations[index]['date'] = cleaned_data_split[0].strip()
+                observations[index]['start-time'] = cleaned_data_split[1].strip()
+                observations[index]['duration'] = cleaned_data_split[2].strip()
+                observations[index]['location'] = cleaned_data_split[3].strip()
+                observations[index]['witnesses'] = cleaned_data_split[4].strip()
+                observations[index]['colors'] = cleaned_data_split[5].strip()
+                observations[index]['cleaned'] = 'true'
+                save_array_to_json(observations, 'observations-with-note-text-cleaned.json')
+            except NameError:
+                print(NameError)
+
+
         index += 1
 
-# clean_data_using_gpt()
+
+clean_data_using_gpt()
 
