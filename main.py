@@ -290,24 +290,24 @@ def add_note_text_to_observations():
 def clean_data_using_gpt():
     prompt = """Rens det følgende datasæt. Kun svar med det rensede data!
 
-Dato (DD.MM.YYYY fx 23.04.2017); Begyndelsestidspunkt (skal indeholde formatet 15:30); Varighed i sekunder (skal indeholde varighed i sekunder); Observationssted; Vidner (skal være et heltal); Farver (skal være komma sepereret farver fx grøn, gul, hvid)
+Dato (fx 23.04.2017); Begyndelsestidspunkt (fx 15:30); Varighed i sekunder (fx 60); Observationssted; Vidner (fx 2); Farver (fx grøn, gul, hvid)
 
-Original data:
+Original:
 august 1999;ca. 00.00 og ca. 01.30;flere min;Nordsjælland;?;hvidt
-Renset data:
+Renset:
 01.08.1999;00:00;180;Nordsjælland;NAN;hvid
 
-Original data:
+Original:
 04.08.00;ca. 03.30-04.00 DST;2-3 sek;5500 Middelfart;2-3;guld, gløder som fuldmånen
-Renset data:
+Renset:
 04.08.2000;03:30;3;5500 Middelfart;3;guld
 
-Original data:
+Original:
 sommeren ca. 1979;eftermiddag;+20 sek;6400 Sønderborg;6-10;sort/grå/blå
-Renset data:
+Renset:
 06.01.1979;15:00;20;6400 Sønderborg;10; sort, grå, blå; 
 
-Original data:"""
+Original:"""
 
     filename = 'observations-with-note-text-cleaned.json'  # Replace with the actual filename
     observations = read_json_file(filename)
@@ -343,9 +343,11 @@ Original data:"""
                 observations[index]['colors'] = cleaned_data_split[5].strip()
                 observations[index]['cleaned'] = 'true'
                 save_array_to_json(observations, 'observations-with-note-text-cleaned.json')
-            except NameError:
-                print(NameError)
-
+            except:
+                print("ERROR with", observations[index])
+            wait_time = random.randint(4, 9)
+            # Pause the execution for the randomly generated time
+            time.sleep(wait_time)
 
         index += 1
 
