@@ -354,7 +354,7 @@ Original:"""
         index += 1
 
 
-clean_data_using_gpt()
+#clean_data_using_gpt()
 
 def geo_encode_locations(location):
     url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + location + ".json?bbox=8.075720, 54.559132, 15.193450, 57.750510&access_token=" + mapbox_api_key  # replace this with your URL
@@ -367,4 +367,18 @@ def geo_encode_locations(location):
         print(data)
     else:
         print(f"Request failed with status {response.status_code}")
-    #
+
+
+def original_location():
+    observations_cleaned = read_json_file('observations-with-note-text-cleaned.json')
+    observations = read_json_file('observations-with-note-text.json')
+
+    observations_with_notes = []
+    i = 0
+    for observation in observations:
+        observations_cleaned[i]['location'] = observations[i]['location']
+        i += 1
+    save_array_to_json(observations_cleaned, 'observations-with-note-text-cleaned.json')
+
+original_location()
+#geo_encode_locations()
