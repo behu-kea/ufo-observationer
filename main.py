@@ -405,7 +405,7 @@ def geo_encode_observations():
                 observations[index]['longitude'] = 'nan'
 
             save_array_to_json(observations, 'observations-with-note-text-cleaned.json')
-            wait_time = random.randint(2, 4)
+            wait_time = random.randint(1, 3)
             # Pause the execution for the randomly generated time
             time.sleep(wait_time)
         index += 1
