@@ -356,20 +356,10 @@ Original:"""
 
 #clean_data_using_gpt()
 
-def geo_encode_locations(location):
-    url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + location + ".json?bbox=8.075720, 54.559132, 15.193450, 57.750510&access_token=" + mapbox_api_key  # replace this with your URL
-    response = requests.get(url)
-
-    # Check the status code to make sure the request was successful
-    if response.status_code == 200:
-        data = response.text  # or response.json() if the data is in JSON format
-
-        print(data)
-    else:
-        print(f"Request failed with status {response.status_code}")
 
 
-def original_location():
+# small mistake, i should not have included the location in the cleaning part
+def take_original_location():
     observations_cleaned = read_json_file('observations-with-note-text-cleaned.json')
     observations = read_json_file('observations-with-note-text.json')
 
@@ -380,5 +370,45 @@ def original_location():
         i += 1
     save_array_to_json(observations_cleaned, 'observations-with-note-text-cleaned.json')
 
-original_location()
-#geo_encode_locations()
+
+# take_original_location()
+
+
+def geo_encode_location(location):
+    url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + location + ".json?bbox=8.075720, 54.559132, 15.193450, 57.750510&access_token=" + mapbox_api_key  # replace this with your URL
+    response = requests.get(url)
+
+    # Check the status code to make sure the request was successful
+    if response.status_code == 200:
+        data = response.json()  # or response.json() if the data is in JSON format
+        center = data['features'][0]['center']
+        return {"latitude": center[1], "longitude": center[0]}
+    else:
+        print(f"Request failed with status {response.status_code}")
+
+
+def geo_encode_observations():
+    filename = 'observations-with-note-text-cleaned.json'  # Replace with the actual filename
+    observations = read_json_file(filename)
+
+    index = 0
+    for observation in observations:
+        print("{:.2f}".format(index / len(observations) * 100), "%")
+        if 'latitude' not in observation:
+            try:
+                lat_lng = geo_encode_location(observation['location'])
+                observations[index]['latitude'] = lat_lng['latitude']
+                observations[index]['longitude'] = lat_lng['longitude']
+            except:
+                print("ERROR with", observations[index])
+                observations[index]['latitude'] = 'nan'
+                observations[index]['longitude'] = 'nan'
+
+            save_array_to_json(observations, 'observations-with-note-text-cleaned.json')
+            wait_time = random.randint(2, 4)
+            # Pause the execution for the randomly generated time
+            time.sleep(wait_time)
+        index += 1
+
+
+geo_encode_observations()
