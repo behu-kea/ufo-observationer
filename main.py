@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import time
 import random
+import requests
 
 def save_array_to_json(array, filename):
     with open(filename, 'w', encoding='utf-8') as file:
@@ -21,6 +22,7 @@ import openai
 
 # Load your API key from an environment variable or secret management service
 openai.api_key = os.getenv("OPENAI_API_KEY")
+mapbox_api_key = os.getenv("MAPBOX_APIKEY")
 
 links = [
     "http://www.sufoi.dk/obs/obs-1996/obs96-8a.php",
@@ -354,3 +356,15 @@ Original:"""
 
 clean_data_using_gpt()
 
+def geo_encode_locations(location):
+    url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + location + ".json?bbox=8.075720, 54.559132, 15.193450, 57.750510&access_token=" + mapbox_api_key  # replace this with your URL
+    response = requests.get(url)
+
+    # Check the status code to make sure the request was successful
+    if response.status_code == 200:
+        data = response.text  # or response.json() if the data is in JSON format
+
+        print(data)
+    else:
+        print(f"Request failed with status {response.status_code}")
+    #
